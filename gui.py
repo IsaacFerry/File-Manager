@@ -19,21 +19,9 @@ def get_file_types(folder_path):
 
     return file_types
 
-# def turn_set_into_list(file_types):
-#     return list(file_types)
-
-
-
-# Example usage:
-folder_path = r"C:\Users\isaac\Downloads"  # Change this to your folder path
+# Get the folder path from the user
+folder_path = r"C:\Users\isaac\Downloads" 
 file_types = get_file_types(folder_path)
-
-for i in file_types:
-    print("filetype: ", i)
-print("File types found:", file_types)
-
-# listIntoSet = turn_set_into_list(file_types)
-# print("set turned into a list: ", listIntoSet)
 
 # function to create the checkboxes for each file type
 def create_checkboxes(root, num_checkboxes):
@@ -66,35 +54,77 @@ def create_checkboxes(root, num_checkboxes):
         
     return checkboxes
 
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("File Manager")
+        # sets the size of the window
+        height = 600
+        width = 600
 
-root = tk.Tk()
-# sets the title of the window
-root.title("File Manager")
+        # sets the window to open in the center of the screen
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+                
+        self.geometry(f'{width}x{height}+{x}+{y}')
+        
+        self.container = tk.Frame(self)
+        self.container.pack(side="top", fill="both", expand=True)
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+        self.frames = {}
+        
+        for i in (folderPage, orgonizePage):
+            frame = i(self.container, self)
+            self.frames[i] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
+        self.show_frame(folderPage)
+        
+    def show_frame(self, container):
+        frame = self.frames[container]
+        frame.tkraise()
 
-# sets the size of the window
-height = 600
-width = 600
+class folderPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        
+        # Display text telling the user to enter the folder path
+        folderPathLabel = Label(self, text="Folder Path you want orgonized", justify='left')
+        folderPathLabel.place(x=20, y=20)
+        
 
-# sets the window to open in the center of the screen
-x = (root.winfo_screenwidth() // 2) - (width // 2)
-y = (root.winfo_screenheight() // 2) - (height // 2)
+        # Text box to get the path of the users folder
+        getFolderPath = tk.Text(self, height=1, width=45)
+        getFolderPath.place(x=200, y=20)
+        
+        
+        button = tk.Button(self, text="go to orgonize page", command=lambda: controller.show_frame(orgonizePage))
+        button.place(x=200, y=50)
+        
+def button_pressed():
+    print("Button was pressed!")        
+class orgonizePage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        
+        # Display text telling the user to select the file extension
+        textSelectFileExtension = Label(self, text="Select the file extension you want to orgonize into their respective folders")
+        textSelectFileExtension.place(x=20, y=30)
 
-root.geometry(f'{width}x{height}+{x}+{y}')
+        checkboxes = create_checkboxes(self, file_types)
+        
+        btnBack = tk.Button(self, text = "Back", command=lambda: controller.show_frame(folderPage))
+        btnBack = btnBack.place(x=20, y=550)
+        
+        btnSave = tk.Button(self, text = "Save", command=button_pressed)
+        btnSave = btnSave.place(x=540, y=550)
+        
 
-# Display text telling the user to enter the folder path
-folderPathLabel = Label(root, text="Folder Path you want orgonized", justify='left')
-folderPathLabel.place(x=10, y=20)
-
-# Text box to get the path of the users folder
-getFolderPath = tk.Text(root, height=1, width=45)
-getFolderPath.place(x=200, y=20)
-
-textSelectFileExtension = Label(root, text="Select File Extension")
-textSelectFileExtension.place(x=50, y=60)
-
-checkboxes = create_checkboxes(root, file_types)
+        
+        
 
 # start the main event loop, this is required for the window to appear
-root.mainloop()
+app = App()
+app.mainloop()
 
 
