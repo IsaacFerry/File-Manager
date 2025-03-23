@@ -1,12 +1,12 @@
 import tkinter as tk
-from tkinter import Label
-from PIL import Image, ImageTk
+from tkinter import *
 import os
 
 # Function called when a checkbox is clicked
 def on_checkbox_change(checkbox_value, checkbox_var):
    print(f"Checkbox {checkbox_value} is {'checked' if checkbox_var.get() else 'unchecked'}")
    
+
 def get_file_types(folder_path):
     file_types = set()
 
@@ -19,9 +19,6 @@ def get_file_types(folder_path):
 
     return file_types
 
-# Get the folder path from the user
-folder_path = r"C:\Users\isaac\Downloads" 
-file_types = get_file_types(folder_path)
 
 # function to create the checkboxes for each file type
 def create_checkboxes(root, num_checkboxes):
@@ -53,6 +50,11 @@ def create_checkboxes(root, num_checkboxes):
         checkboxes.append(checkbox_var)
         
     return checkboxes
+
+def get_file_path():
+    userInput = getFolderPath.get("1.0", "end-1c")
+    print(f"User Path: {userInput}")
+    return userInput
 
 class App(tk.Tk):
     def __init__(self):
@@ -86,6 +88,8 @@ class App(tk.Tk):
 
 class folderPage(tk.Frame):
     def __init__(self, parent, controller):
+        
+        path = StringVar()
         tk.Frame.__init__(self, parent)
         
         # Display text telling the user to enter the folder path
@@ -94,24 +98,31 @@ class folderPage(tk.Frame):
         
 
         # Text box to get the path of the users folder
-        getFolderPath = tk.Text(self, height=1, width=45)
+        global getFolderPath
+        getFolderPath = tk.Text(self, width=45, height=1)
         getFolderPath.place(x=200, y=20)
         
-        
-        button = tk.Button(self, text="go to orgonize page", command=lambda: controller.show_frame(orgonizePage))
+        button = tk.Button(self, text="go to orgonize page", command=lambda: [controller.frames[orgonizePage].load_checkboxes(),
+                                                                              controller.show_frame(orgonizePage), 
+                                                                              get_file_path()])
         button.place(x=200, y=50)
         
+        
+        
+        
 def button_pressed():
-    print("Button was pressed!")        
+    print(folderPage.path)        
 class orgonizePage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.controller = controller
         
         # Display text telling the user to select the file extension
         textSelectFileExtension = Label(self, text="Select the file extension you want to orgonize into their respective folders")
         textSelectFileExtension.place(x=20, y=30)
+        
 
-        checkboxes = create_checkboxes(self, file_types)
+        self.checkboxes = [] 
         
         btnBack = tk.Button(self, text = "Back", command=lambda: controller.show_frame(folderPage))
         btnBack = btnBack.place(x=20, y=550)
@@ -119,9 +130,16 @@ class orgonizePage(tk.Frame):
         btnSave = tk.Button(self, text = "Save", command=button_pressed)
         btnSave = btnSave.place(x=540, y=550)
         
+    def load_checkboxes(self):
+        file_path = get_file_path()
+        if not os.path.exists(file_path):
+            print("Invalid path entered.")
+            return
+        
+        file_types = get_file_types(file_path)
+        self.checkboxes = create_checkboxes(self, file_types)
+        
 
-        
-        
 
 # start the main event loop, this is required for the window to appear
 app = App()
