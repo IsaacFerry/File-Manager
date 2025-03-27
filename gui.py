@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import *
+from tkinter import filedialog
 import os
 
 # Function called when a checkbox is clicked
@@ -7,54 +8,31 @@ def on_checkbox_change(checkbox_value, checkbox_var):
    print(f"Checkbox {checkbox_value} is {'checked' if checkbox_var.get() else 'unchecked'}")
    
 
-def get_file_types(folder_path):
-    file_types = set()
-
-    # Iterate through all files in the folder
-    for file in os.listdir(folder_path):
-        if os.path.isfile(os.path.join(folder_path, file)):
-            file_extension = os.path.splitext(file)[1].lower()  # Get the extension
-            if file_extension:
-                file_types.add(file_extension)
-
-    return file_types
-
-
 # function to create the checkboxes for each file type
-def create_checkboxes(root, num_checkboxes):
+def create_checkboxes(root, file_types):
     checkboxes = []
     rowVal = 2
     colVal = 0
     
-    for i in num_checkboxes:
+    for file_type in file_types:
         checkbox_var = tk.BooleanVar()
         checkbox = tk.Checkbutton(
             root,
-            text = i,
-            variable = checkbox_var,
-            command = lambda i=i, var = checkbox_var: on_checkbox_change(i, var)
+            text=file_type,
+            variable=checkbox_var,
+            command=lambda ft=file_type, var=checkbox_var: on_checkbox_change(ft, var)
         )
-        print(checkbox)
-        
-        # Place checkbox in the screen
         checkbox.place(x=20 + colVal * 100, y=40 + rowVal * 30)
-
-        # Move to the next column
         colVal += 1
 
-        # If 5 checkboxes are placed in a row, move to the next row
         if colVal >= 5:
-            colVal = 0  # Reset to first column
-            rowVal += 1  # Move to the next row
+            colVal = 0
+            rowVal += 1
 
-        checkboxes.append(checkbox_var)
+        checkboxes.append((file_type, checkbox_var))
         
     return checkboxes
 
-def get_file_path():
-    userInput = getFolderPath.get("1.0", "end-1c")
-    print(f"User Path: {userInput}")
-    return userInput
 
 class App(tk.Tk):
     def __init__(self):
@@ -75,6 +53,7 @@ class App(tk.Tk):
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
         self.frames = {}
+        self.selected_path = ""
         
         for i in (folderPage, orgonizePage):
             frame = i(self.container, self)
@@ -85,9 +64,23 @@ class App(tk.Tk):
     def show_frame(self, container):
         frame = self.frames[container]
         frame.tkraise()
+        
+def openFile():
+    filepath = filedialog.askdirectory()
+    return filepath
 
+def printPath():
+    print(openFile())
+def choose_folder():
+    if openFile():
+        getFolderPath.delete("1.0", "end")
+        getFolderPath.insert("end", openFile())
+        
+        print(getFolderPath.get("1.0", "end-1c"))
 class folderPage(tk.Frame):
+    
     def __init__(self, parent, controller):
+        self.controller = controller
         
         path = StringVar()
         tk.Frame.__init__(self, parent)
@@ -104,14 +97,33 @@ class folderPage(tk.Frame):
         
         button = tk.Button(self, text="go to orgonize page", command=lambda: [controller.frames[orgonizePage].load_checkboxes(),
                                                                               controller.show_frame(orgonizePage), 
-                                                                              get_file_path()])
-        button.place(x=200, y=50)
+                                                                              printPath])
+        button.place(x=400, y=50)
         
+        btnFindFolder = tk.Button(self, text="Find Folder", command= self.choose_folder)
+        btnFindFolder.place(x=200, y=50)
         
+    def choose_folder(self):
+        path = openFile()
+        if path:
+            getFolderPath.delete("1.0", "end")
+            getFolderPath.insert("end", path)
+            self.controller.selected_path = path
+            print(path)
+            
+    def go_to_organize_page(self, controller):
+        path = getFolderPath.get("1.0", "end-1c").strip()
+        if not path or not os.path.exists(path):
+            print("Please select a valid folder path before continuing.")
+            return
+        controller.selected_path = path
+        controller.frames[orgonizePage].load_checkboxes()
+        controller.show_frame(orgonizePage)
+
+
         
-        
-def button_pressed():
-    print(folderPage.path)        
+
+           
 class orgonizePage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -127,17 +139,25 @@ class orgonizePage(tk.Frame):
         btnBack = tk.Button(self, text = "Back", command=lambda: controller.show_frame(folderPage))
         btnBack = btnBack.place(x=20, y=550)
         
-        btnSave = tk.Button(self, text = "Save", command=button_pressed)
+        btnSave = tk.Button(self, text="Save", command=self.save_selected_checkboxes)
         btnSave = btnSave.place(x=540, y=550)
         
     def load_checkboxes(self):
-        file_path = get_file_path()
+        import fileManager
+        # file_path = fileManager.get_file_path()
+        file_path = self.controller.selected_path
         if not os.path.exists(file_path):
             print("Invalid path entered.")
             return
         
-        file_types = get_file_types(file_path)
+        file_types = fileManager.get_file_types(file_path)
         self.checkboxes = create_checkboxes(self, file_types)
+        
+    def save_selected_checkboxes(self):
+        for i, checkbox_var in enumerate(self.checkboxes):
+            value = checkbox_var[0]  # the file type string
+            var = checkbox_var[1]    # the tk.BooleanVar
+            print(f"Checkbox {value} is {'checked' if var.get() else 'unchecked'}")
         
 
 
