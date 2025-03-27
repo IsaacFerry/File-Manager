@@ -18,5 +18,10 @@ def get_file_types(folder_path):
 
     return file_types
 
-# def openFile():
-#     filepath = filedialog.askdirectory()
+def createFolders(base_path, selected_file_types):
+    for file_type in selected_file_types:
+        folder_path = os.path.join(base_path, file_type[1:])  # remove dot from extension
+        print("Creating folder: ", folder_path)
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+            print(f"Created folder: {folder_path}")

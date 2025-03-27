@@ -2,10 +2,12 @@ import tkinter as tk
 from tkinter import *
 from tkinter import filedialog
 import os
+import fileManager
 
 # Function called when a checkbox is clicked
 def on_checkbox_change(checkbox_value, checkbox_var):
    print(f"Checkbox {checkbox_value} is {'checked' if checkbox_var.get() else 'unchecked'}")
+   print("test: ", checkbox_value, checkbox_var.get())
    
 
 # function to create the checkboxes for each file type
@@ -154,10 +156,14 @@ class orgonizePage(tk.Frame):
         self.checkboxes = create_checkboxes(self, file_types)
         
     def save_selected_checkboxes(self):
-        for i, checkbox_var in enumerate(self.checkboxes):
-            value = checkbox_var[0]  # the file type string
-            var = checkbox_var[1]    # the tk.BooleanVar
-            print(f"Checkbox {value} is {'checked' if var.get() else 'unchecked'}")
+        selected_file_types = []
+        for file_type, var in self.checkboxes:
+            if var.get():
+                selected_file_types.append(file_type)
+
+        print("Selected file types:", selected_file_types)
+        if selected_file_types:
+            fileManager.createFolders(self.controller.selected_path, selected_file_types)
         
 
 
