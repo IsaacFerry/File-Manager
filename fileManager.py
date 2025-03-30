@@ -25,3 +25,13 @@ def createFolders(base_path, selected_file_types):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
             print(f"Created folder: {folder_path}")
+            
+def moveFiles(base_path, selected_file_types):
+    for file_type in selected_file_types:
+        folder_path = os.path.join(base_path, file_type[1:])  # remove dot from extension
+        for file in os.listdir(base_path):
+            if file.endswith(file_type):
+                file_path = os.path.join(base_path, file)
+                new_file_path = os.path.join(folder_path, file)
+                os.rename(file_path, new_file_path)
+                print(f"Moved file: {file_path} to {new_file_path}")

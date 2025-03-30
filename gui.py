@@ -163,7 +163,7 @@ class orgonizePage(tk.Frame):
 
         print("Selected file types:", selected_file_types)
         if selected_file_types:
-            fileManager.createFolders(self.controller.selected_path, selected_file_types)
+            fileManager.moveFiles(self.controller.selected_path, selected_file_types)
         
 
 
