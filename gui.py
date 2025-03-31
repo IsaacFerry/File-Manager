@@ -31,9 +31,14 @@ def create_checkboxes(root, file_types):
             colVal = 0
             rowVal += 1
 
-        checkboxes.append((file_type, checkbox_var))
+        checkboxes.append((file_type, checkbox_var, checkbox))
         
     return checkboxes
+
+def delete_checkboxes(checkbox_list):
+    for file_type, checkbox_var, checkbox_widget in checkbox_list:
+        checkbox_widget.destroy()
+    return []
 
 
 class App(tk.Tk):
@@ -138,7 +143,7 @@ class orgonizePage(tk.Frame):
 
         self.checkboxes = [] 
         
-        btnBack = tk.Button(self, text = "Back", command=lambda: controller.show_frame(folderPage))
+        btnBack = tk.Button(self, text = "Back", command=lambda: [controller.show_frame(folderPage), self.backButton()])
         btnBack = btnBack.place(x=20, y=550)
         
         btnSave = tk.Button(self, text="Save", command=self.save_selected_checkboxes)
@@ -157,13 +162,17 @@ class orgonizePage(tk.Frame):
         
     def save_selected_checkboxes(self):
         selected_file_types = []
-        for file_type, var in self.checkboxes:
+        for file_type, var, _ in self.checkboxes:
             if var.get():
                 selected_file_types.append(file_type)
 
         print("Selected file types:", selected_file_types)
         if selected_file_types:
+            fileManager.createFolders(self.controller.selected_path, selected_file_types)
             fileManager.moveFiles(self.controller.selected_path, selected_file_types)
+            
+    def backButton(self):
+        self.checkboxes = delete_checkboxes(self.checkboxes)
         
 
 
