@@ -27,3 +27,5 @@ To set up and run File-Manager on your local machine, follow these steps:
 2. **Select a Directory**: Use the GUI to choose the folder you wish to organize.
 3. **Choose File Types**: The application will display all detected file types in the selected directory.
 4. **Organize Files**: Click the "Save" button to create folders and move the corresponding files.
+
+**Notes:** Please note that this project was developed for Windows and may not work properly on other operating systems. 
